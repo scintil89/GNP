@@ -3,6 +3,8 @@ using System.Collections;
 
 public class DamageScript : MonoBehaviour
 {
+    //데미지 처리를 하는 스크립트.
+
     public int hp;
     public GameObject destroyParticle;
 

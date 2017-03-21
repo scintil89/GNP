@@ -1,6 +1,7 @@
 ﻿using UnityEngine;
-using System.Collections.Generic;
 using System.Collections;
+using System.Collections.Generic;
+
 
 public enum KNIGHTSTATE
 {
@@ -10,11 +11,10 @@ public enum KNIGHTSTATE
     attack,
 }
 
-public class KnightScript : MonoBehaviour
+public class KnightScript : UnitScript
 {
     public GameObject outline;
 
-    public Transform target = null;
     float moveSpeed = 5.0f;
     float rotationSpeed = 10.0f;
     float attackableRange = 12.0f;
@@ -136,7 +136,7 @@ public class KnightScript : MonoBehaviour
         if (target)
             dicState[state]();
 
-        if (gameObject.GetComponent<UnitClickScript>().isTouch == true)
+        if (isTouching() == true)
         {
             outline.SetActive(true);
         }

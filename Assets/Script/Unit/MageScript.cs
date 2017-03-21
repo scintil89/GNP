@@ -13,18 +13,20 @@ public enum MAGESTATE
     death
 }
 
-public class MageScript : MonoBehaviour
+public class MageScript : UnitScript
 {
-    public GameObject magicObject;
-    public GameObject outline1;
-    public GameObject outline2;
-    public Transform target = null;
+    public GameObject magicObject; //유닛의 스킬 이펙트 오브젝트
+
+    public GameObject outline1; //유닛 자체의 아웃라인
+    public GameObject outline2; //유닛이 들고 있는 지팡이의 아웃라인
 
     float moveSpeed = 5.0f;         
     float rotationSpeed = 10.0f;     
     float attackableRange = 10.5f;
     int normalDamage = 10;
-    int magicDamage = 25;
+
+    //스킬 관련 변수
+    int magicDamage = 25;   
     bool skillCkr = false;
     float skillCoolTime = 5.0f;
 
@@ -60,17 +62,18 @@ public class MageScript : MonoBehaviour
 	
     void Awake()
     {
-//        target = GetComponent<UnitClickScript>().target;
+        //애니메이션 자료구조 초기화
+        //target = GetComponent<UnitClickScript>().target;
 
         anim = GetComponent<Animation>();
         characterController = GetComponent<CharacterController>();
 
-        dicState[MAGESTATE.none] = None;
-        dicState[MAGESTATE.free] = Idle;
-        dicState[MAGESTATE.walk] = Move;
-        dicState[MAGESTATE.attack] = Attack;
-        dicState[MAGESTATE.skill] = Skill;
-        dicState[MAGESTATE.death] = Death;
+        dicState[MAGESTATE.none]    = None;
+        dicState[MAGESTATE.free]    = Idle;
+        dicState[MAGESTATE.walk]    = Move;
+        dicState[MAGESTATE.attack]  = Attack;
+        dicState[MAGESTATE.skill]   = Skill;
+        dicState[MAGESTATE.death]   = Death;
 
         InitMage();
     }
@@ -185,7 +188,7 @@ public class MageScript : MonoBehaviour
     void OnGUI()
     {
         //set cool time
-        if (gameObject.GetComponent<UnitClickScript>().isTouch == true)
+        if (isTouching() == true)
         {
             if (GUI.Button(new Rect(20, 30, 100, 30), "Magic"))
             {
@@ -209,7 +212,7 @@ public class MageScript : MonoBehaviour
         skillCoolTime += Time.deltaTime;
 
 
-        if (gameObject.GetComponent<UnitClickScript>().isTouch == true)
+        if (isTouching() == true)
         {
             outline1.SetActive(true);
             outline2.SetActive(true);
