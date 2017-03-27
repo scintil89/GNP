@@ -81,7 +81,9 @@
      <Compile Include="Assets\Script\Unit\MageScript.cs" />
      <Compile Include="Assets\Script\Unit\UnitClickScript.cs" />
      <Compile Include="Assets\Script\Unit\UnitScript.cs" />
+     <Compile Include="Assets\Script\WayPointSetup.cs" />
      <None Include="Assets\Esset\Fantasy Defensive Structures\Fantasy Defensive Strucures\Readme.txt" />
+     <None Include="Assets\Shader\RedNode.shader" />
      <None Include="Assets\Esset\laxer tree pkg\README.txt" />
      <None Include="Assets\Esset\PyroParticles\Prefab\Materials\AdditiveTintable.shader" />
      <None Include="Assets\Shader\NewSurfaceShader.shader" />

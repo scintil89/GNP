@@ -43,14 +43,17 @@ public class ClickEvent : MonoBehaviour
 
                     case 10:
                         {
-                            tempObject = hitObj.transform.gameObject; //새로 클릭한 오브젝트로 대체
-
-                            hitObj.transform.gameObject.GetComponent<UnitScript>().Touching();
-
-                            if(tempObject)
+                            if( hitObj.transform.gameObject.GetComponent<UnitScript>() ) //클릭한것이 유닛이면
                             {
-                                tempObject.GetComponent<UnitScript>().Touching();
-                                tempObject = hitObj.transform.gameObject;
+                                tempObject = hitObj.transform.gameObject; //새로 클릭한 오브젝트로 대체
+
+                                hitObj.transform.gameObject.GetComponent<UnitScript>().Touching();
+
+                                if (tempObject)
+                                {
+                                    tempObject.GetComponent<UnitScript>().Touching();
+                                    tempObject = hitObj.transform.gameObject;
+                                }
                             }
                         } 
                         break;

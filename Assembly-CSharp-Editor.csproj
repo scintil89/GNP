@@ -47,6 +47,7 @@
   <ItemGroup>
      <Compile Include="Assets\Esset\PyroParticles\Prefab\Editor\PyroParticlesEditor.cs" />
      <None Include="Assets\Esset\Fantasy Defensive Structures\Fantasy Defensive Strucures\Readme.txt" />
+     <None Include="Assets\Shader\RedNode.shader" />
      <None Include="Assets\Esset\laxer tree pkg\README.txt" />
      <None Include="Assets\Esset\PyroParticles\Prefab\Materials\AdditiveTintable.shader" />
      <None Include="Assets\Shader\NewSurfaceShader.shader" />
