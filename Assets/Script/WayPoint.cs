@@ -47,15 +47,18 @@ public class WayPoint : MonoBehaviour
         {
             Debug.LogError("test" + node.nodeName); // 
 
-            RaycastHit hitObj;
+            RaycastHit[] hitObj = Physics.SphereCastAll(node.pos, 30.0f, transform.forward);
 
-            if (Physics.SphereCast(node.pos, 30.0f, transform.forward, out hitObj) == true)
-            {
-                Debug.LogError("test" + hitObj.transform.name); // 
+            Debug.LogError("test" + hitObj); // 
 
-                var tempNode = nodeList.Find(x => x.nodeName == hitObj.transform.gameObject.name);
-                if(tempNode)
-                    node.adjnodeList.Add(tempNode); //인접 노드로 추가
+            //if (Physics.SphereCast(node.pos, 30.0f, transform.forward, out hitObj) == true)
+            //{
+            //    Debug.LogError("test" + hitObj.transform.name); // 
+            //
+            //    var tempNode = nodeList.Find(x => x.nodeName == hitObj.transform.gameObject.name);
+            //
+            //    if(tempNode)
+            //        node.adjnodeList.Add(tempNode); //인접 노드로 추가
 
                 //Debug.LogError("init adjnodeList.. NodeName : " + node.nodeID + ", adj " + tempNode.nodeName); // 
             }
