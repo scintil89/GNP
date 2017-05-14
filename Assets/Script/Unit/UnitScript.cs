@@ -7,10 +7,10 @@ public class UnitScript : MonoBehaviour
 {
     public Transform target = null;
 
-    float moveSpeed = 0.0f;         //이동 속도
-    float rotationSpeed = 0.0f;     //회전 속도
-    float attackableRange = 0.0f;   //공격 가능한 거리
-    int normalDamage = 0;           //평타 데미지
+    float moveSpeed;         //이동 속도
+    float rotationSpeed;     //회전 속도
+    float attackableRange;   //공격 가능한 거리
+    int normalDamage;           //평타 데미지
 
 
     //유닛 터치

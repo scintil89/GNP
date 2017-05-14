@@ -74,6 +74,8 @@
      <Compile Include="Assets\Script\ClickEvent.cs" />
      <Compile Include="Assets\Script\DamageScript.cs" />
      <Compile Include="Assets\Script\GameManagerScript.cs" />
+     <Compile Include="Assets\Script\MemoryPoolManager.cs" />
+     <Compile Include="Assets\Script\MemoryPoolScript.cs" />
      <Compile Include="Assets\Script\SceneChangeScript.cs" />
      <Compile Include="Assets\Script\StartScript.cs" />
      <Compile Include="Assets\Script\Tower\TowerScript.cs" />
