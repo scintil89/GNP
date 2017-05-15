@@ -29,7 +29,8 @@ public class DamageScript : MonoBehaviour
         hp -= damage;
         //Debug.Log(gameObject.name + " HP : " + hp);
 
-        StartCoroutine(DamageFontProcess(damage));
+        if(isExist() == true)
+            StartCoroutine(DamageFontProcess(damage));
     }
 
     IEnumerator DeadProcess()

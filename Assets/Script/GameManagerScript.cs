@@ -10,6 +10,11 @@ public class GameManagerScript : MonoBehaviour
 
     bool state = false;
 
+    void Awake()
+    {
+        MemoryPoolManager.Instance.InitObjPool();
+    }
+
 	// Update is called once per frame
 	void Update ()
     {

@@ -17,7 +17,7 @@ public class ClickEvent : MonoBehaviour
     { 
         if (Input.GetMouseButtonDown(0)) //마우스 왼쪽 클릭
         {
-            Debug.Log("Left Button Clicked");
+            //Debug.Log("Left Button Clicked");
 
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hitObj;
@@ -67,7 +67,7 @@ public class ClickEvent : MonoBehaviour
 
         if (Input.GetMouseButtonDown(1)) //마우스 오른쪽 클릭
         {
-            Debug.Log("Right Button Clicked");
+            //Debug.Log("Right Button Clicked");
 
             //tempObject가 클릭중인지 검사
             if( tempObject.GetComponent<UnitScript>().isTouching() == true)
@@ -88,7 +88,7 @@ public class ClickEvent : MonoBehaviour
                             tempObject.GetComponent<UnitScript>().target = hitObj.transform;
                         }
 
-                        Debug.Log(tempObject.GetComponent<UnitScript>().target);
+                        //Debug.Log(tempObject.GetComponent<UnitScript>().target);
 
                         //else if (gameObject.GetComponent<KnightScript>())
                         //{

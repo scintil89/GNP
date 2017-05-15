@@ -50,13 +50,13 @@ public class WayPoint : MonoBehaviour
 
 
 
-            RaycastHit[] hitObj = Physics.SphereCastAll(node.pos, 3.0f, transform.forward);
+            //RaycastHit[] hitObj = Physics.SphereCastAll(node.pos, 3.0f, transform.forward);
 
-            foreach (var i in hitObj)
-            {
-                if(i.transform.gameObject.layer == 12)
-                    Debug.Log("test- " + node.nodeName + " hit : " + i.transform.name); // 
-            }
+            //foreach (var i in hitObj)
+            //{
+            //    //if(i.transform.gameObject.layer == 12)
+            //    //    Debug.Log("test- " + node.nodeName + " hit : " + i.transform.name); // 
+            //}
                 
 
             //if (Physics.SphereCast(node.pos, 30.0f, transform.forward, out hitObj) == true)

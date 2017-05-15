@@ -15,7 +15,7 @@ public enum MAGESTATE
 
 public class MageScript : UnitScript
 {
-    public GameObject magicObject; //유닛의 스킬 이펙트 오브젝트
+    //public GameObject magicObject; //유닛의 스킬 이펙트 오브젝트
 
     public GameObject outline1; //유닛 자체의 아웃라인
     public GameObject outline2; //유닛이 들고 있는 지팡이의 아웃라인
@@ -162,7 +162,13 @@ public class MageScript : UnitScript
 
                 target.gameObject.GetComponent<DamageScript>().Hit(magicDamage);
 
-                GameObject magic = Instantiate(magicObject) as GameObject;
+                //GameObject magic = Instantiate(magicObject) as GameObject;
+                GameObject magic = MemoryPoolManager.Instance.Get("Flamestrike");
+                if (!magic)
+                {
+                    Debug.LogError("MageScript magic Get Failed");
+                    return;
+                }
 
                 magic.transform.position = target.position;
             }
