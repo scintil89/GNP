@@ -48,8 +48,6 @@ public class WayPoint : MonoBehaviour
             //Debug.Log("test" + node.nodeName);
 
 
-
-
             //RaycastHit[] hitObj = Physics.SphereCastAll(node.pos, 3.0f, transform.forward);
 
             //foreach (var i in hitObj)

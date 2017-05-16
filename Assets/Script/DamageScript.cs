@@ -4,9 +4,17 @@ using System.Collections;
 public class DamageScript : MonoBehaviour
 {
     //데미지 처리를 하는 스크립트.
+    enum state
+    {
+        LIVE = 0,
+        DEAD = 1,
+        DYING = 2
+    }
+
+    state nowState;
 
     public int hp;
-    public GameObject destroyParticle;
+    public string destroyParticle = "FireExplosion";
 
     //the HP Particle
     public GameObject HPParticle;
@@ -16,11 +24,17 @@ public class DamageScript : MonoBehaviour
     public Vector3 DefaultForce = new Vector3(0f, 1f, 0f);
     public float DefaultForceScatter = 0.5f;
 
+    void Awake()
+    {
+        nowState = state.LIVE;
+    }
+
     public bool isExist()
     {
         if (hp <= 0)
+        {
             return false;
-
+        }
         return true;
     }
 
@@ -30,20 +44,15 @@ public class DamageScript : MonoBehaviour
         //Debug.Log(gameObject.name + " HP : " + hp);
 
         if(isExist() == true)
-            StartCoroutine(DamageFontProcess(damage));
+        {
+            StartCoroutine( DamageFontProcess(damage) );
+        }
+        else
+        {
+            StartCoroutine( DeadProcess() );
+        }
     }
 
-    IEnumerator DeadProcess()
-    {
-        yield return new WaitForSeconds(0.9f);
-
-        GameObject particle = Instantiate(destroyParticle) as GameObject;
-        particle.transform.position = gameObject.transform.position;
-
-        //Destroy(gameObject);
-        gameObject.SetActive(false);
-    }
-        
     IEnumerator DamageFontProcess(int damage)
     {
         yield return new WaitForSeconds(0.5f);
@@ -65,12 +74,34 @@ public class DamageScript : MonoBehaviour
                         ));
     }
 
-    // Update is called once per frame
-    void Update ()
+    IEnumerator DeadProcess() //IEnumerator
     {
-        if (isExist() == false)
-        {
-            StartCoroutine(DeadProcess());
-        }
+        //Debug.Log("DeadProcess " + gameObject.name);
+        yield return new WaitForSeconds(0.5f);
+
+        GameObject particle = MemoryPoolManager.Instance.Get(destroyParticle);
+        particle.transform.position = gameObject.transform.position;
+
+        yield return new WaitForSeconds(0.5f);
+
+        MemoryPoolManager.Instance.Free(particle);
+
+        //Debug.Log("DeadProcess after particle free" + gameObject.name);
+
+        //yield return new WaitForSeconds(0.5f);
+
+        MemoryPoolManager.Instance.Free(gameObject);
+        
+       //Debug.Log("DeadProcess after gameObject free" + gameObject.name);
     }
+        
+    // Update is called once per frame
+    //void Update ()
+    //{
+    //    if (isExist() == false)
+    //    {
+    //        StartCoroutine(DeadProcess());
+    //        //DeadProcess();
+    //    }
+    //}
 }

@@ -11,7 +11,7 @@ public class TowerScript : MonoBehaviour
     public string towerAttack;
     public string spawnUnit; 
 
-    //public GameObject towerAttack; //타워의 공격 파티클
+    public GameObject towerAttackParticle; //타워의 공격 파티클
     //GameObject[] particlePool = null;
     //public MemoryPoolScript towerAttackPool;// = new MemoryPoolScript(); //(towerAttack, "towerAttack", 10)
     //public GameObject spawnUnit; //타워가 소환하는 유닛
@@ -73,20 +73,21 @@ public class TowerScript : MonoBehaviour
         }
     }
 
-    IEnumerator Attack(GameObject target)
+    void Attack(GameObject target)
     {
         if (!target)
         {
             //return
-            yield break;
+            return;
         }
 
         if (!target.GetComponent<DamageScript>().isExist())
         { 
             Debug.Log("Unattackable target");
-            //nowTarget = attackQ.Dequeue();
-            //return;
-            yield break;
+
+            nowTarget = attackQ.Dequeue();
+
+            return;
         }
         
         //공격자 위치
@@ -97,10 +98,11 @@ public class TowerScript : MonoBehaviour
         Vector3 look = target.gameObject.transform.position - new Vector3(x, 25, z);
 
         GameObject particle = MemoryPoolManager.Instance.Get(towerAttack);
+        //GameObject particle = Instantiate(towerAttackParticle) as GameObject;
         if (!particle)
         {
             Debug.LogError("TowerScript particle Get Failed " + towerAttack);
-            yield break;
+            return;
         }
 
         particle.transform.position = new Vector3(x, 25, z);
@@ -108,15 +110,25 @@ public class TowerScript : MonoBehaviour
 
         target.GetComponent<DamageScript>().Hit(towerDamage);
 
+        //yield return new WaitForSeconds(3.0f);
+
+        //MemoryPoolManager.Instance.Free(particle);
+
+        StartCoroutine("ParticleFree", particle);
+    }
+
+    IEnumerator ParticleFree(GameObject particle)
+    {
         yield return new WaitForSeconds(3.0f);
 
         MemoryPoolManager.Instance.Free(particle);
     }
 
+
     //유닛이 충돌 체크 범위 안에 들어왔을때 공격 큐에 넣음.
     void OnTriggerEnter(Collider other)
     {
-        Debug.Log("Collision Enter " + gameObject.name  + " " + other.name);
+        //Debug.Log("Collision Enter " + gameObject.name  + " " + other.name);
 
         if (other.gameObject.layer == enemyLayer)
         {
@@ -134,14 +146,14 @@ public class TowerScript : MonoBehaviour
         //타워 공격
         if (attackQ.Count != 0)
         {
-            Debug.Log("attackQ.count != 0 in");
+            //Debug.Log("attackQ.count != 0 in");
 
             if (!nowTarget)
                 nowTarget = attackQ.Dequeue();
 
             if (coolTime >= coolTimeckr)
             {
-                Debug.Log("attack");
+                //Debug.Log("attack");
                 coolTime = 0.0f;
                 Attack(nowTarget);
             }
