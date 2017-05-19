@@ -28,7 +28,7 @@ public class KnightScript : UnitScript
     // Animation
     public KNIGHTSTATE state = KNIGHTSTATE.attack;
     float stateTime = 0.0f;
-    float idleStateMaxTime = 0.5f;
+    float idleStateMaxTime = 0.2f;
     public Animation anim;
     CharacterController characterController = null;
 
@@ -38,9 +38,25 @@ public class KnightScript : UnitScript
     // Use this for initialization
     void Start ()
     {
+        //오브잭트 재스폰시 타겟초기화
+        Debug.Log("eeeeee");
+        target = null;
+
         characterController = GetComponent<CharacterController>();
 
         outline.SetActive(false);
+
+        if (gameObject.layer == 10)
+        {
+            enemyLayer = 11;
+        }
+
+        else if (gameObject.layer == 11)
+        {
+            enemyLayer = 10;
+        }
+
+        InitKnight();
     }
 
     void Awake()
@@ -51,15 +67,12 @@ public class KnightScript : UnitScript
         dicState[KNIGHTSTATE.none] = None;
         dicState[KNIGHTSTATE.idle] = Idle;
         dicState[KNIGHTSTATE.walk] = Walk;
-        dicState[KNIGHTSTATE.attack] = Attack;
-
-        InitKnight();
+        dicState[KNIGHTSTATE.attack] = Attack;       
     }
 
     void InitKnight()
     {
         anim.Play("WK_heavy_infantry_05_combat_idle");
-
     }
 
     void None()
@@ -127,15 +140,13 @@ public class KnightScript : UnitScript
         {
             state = KNIGHTSTATE.idle;
         }
+
     }
 
     // Update is called once per frame
     void Update ()
     {
-        //Animation
-        if (target)
-            dicState[state]();
-
+        //OutLine 제어
         if (isTouching() == true)
         {
             outline.SetActive(true);
@@ -144,10 +155,22 @@ public class KnightScript : UnitScript
         {
             outline.SetActive(false);
         }
+
+        if (!target) //타겟이 없으면 Idle 상태
+        {
+            return;
+        }
+        else if(target.gameObject.activeSelf == false)
+        {
+            target = null;
+        }
+        else
+            dicState[state]();
     }
 
     void OnCollisionEnter(Collision collision)
     {
+        //충돌이 발생하면 충돌한 물체를 타겟으로 변경
         if(collision.gameObject.layer != gameObject.layer)
         {
             target = collision.gameObject.transform;

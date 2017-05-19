@@ -8,7 +8,7 @@ public class TowerScript : MonoBehaviour
     int enemyLayer;
 
     //유니티 inspector에서 설정
-    public string towerAttack;
+    //public string towerAttack;
     public string spawnUnit; 
 
     public GameObject towerAttackParticle; //타워의 공격 파티클
@@ -18,9 +18,10 @@ public class TowerScript : MonoBehaviour
     //GameObject[] spawnUnitPool = null;
     //public MemoryPoolScript spawnUnitPool;// = new MemoryPoolScript(); //(spawnUnit, "spawnUnit", 10)
 
+    //float attackRange = 11.0f;
 
     public float spawnTime;
-    float deltaSpawnTime = 0.0f;
+    float deltaSpawnTime = 5.0f;
 
     Vector3 spawnPosition;
     int spawnDirection;
@@ -77,7 +78,6 @@ public class TowerScript : MonoBehaviour
     {
         if (!target)
         {
-            //return
             return;
         }
 
@@ -85,7 +85,10 @@ public class TowerScript : MonoBehaviour
         { 
             Debug.Log("Unattackable target");
 
-            nowTarget = attackQ.Dequeue();
+            if (attackQ.Count > 0)
+                nowTarget = attackQ.Dequeue();
+            else
+                nowTarget = null;
 
             return;
         }
@@ -94,17 +97,23 @@ public class TowerScript : MonoBehaviour
         float x = gameObject.transform.position.x;
         float z = gameObject.transform.position.z;
 
-        //
-        Vector3 look = target.gameObject.transform.position - new Vector3(x, 25, z);
+        //if( Mathf.Sqrt( Mathf.Pow((x - target.transform.position.x), 2) + Mathf.Pow((z - target.transform.position.z), 2)) > attackRange)
+        //{
+        //    nowTarget = attackQ.Dequeue();
+        //    return;
+        //}
 
-        GameObject particle = MemoryPoolManager.Instance.Get(towerAttack);
-        //GameObject particle = Instantiate(towerAttackParticle) as GameObject;
+
+        //공격 파티클 포지션 생성, 포지션 설정
+        //GameObject particle = MemoryPoolManager.Instance.Get(towerAttack);
+        GameObject particle = Instantiate(towerAttackParticle) as GameObject;
         if (!particle)
         {
-            Debug.LogError("TowerScript particle Get Failed " + towerAttack);
+            Debug.LogError("TowerScript particle Failed " );
             return;
         }
 
+        Vector3 look = target.gameObject.transform.position - new Vector3(x, 25, z);
         particle.transform.position = new Vector3(x, 25, z);
         particle.transform.rotation = Quaternion.LookRotation(look);
 
@@ -114,28 +123,15 @@ public class TowerScript : MonoBehaviour
 
         //MemoryPoolManager.Instance.Free(particle);
 
-        StartCoroutine("ParticleFree", particle);
+        StartCoroutine(ParticleFree(particle));
     }
 
     IEnumerator ParticleFree(GameObject particle)
     {
         yield return new WaitForSeconds(3.0f);
 
-        MemoryPoolManager.Instance.Free(particle);
-    }
-
-
-    //유닛이 충돌 체크 범위 안에 들어왔을때 공격 큐에 넣음.
-    void OnTriggerEnter(Collider other)
-    {
-        //Debug.Log("Collision Enter " + gameObject.name  + " " + other.name);
-
-        if (other.gameObject.layer == enemyLayer)
-        {
-            //Debug.Log("mylayer " + gameObject.name + " "  + gameObject.layer);
-            //Debug.Log("otherlayer " + other.name + " " + other.gameObject.layer);
-            attackQ.Enqueue(other.gameObject);
-        }
+        //MemoryPoolManager.Instance.Free(particle);
+        Destroy(particle);
     }
 
     void Update()
@@ -149,9 +145,12 @@ public class TowerScript : MonoBehaviour
             //Debug.Log("attackQ.count != 0 in");
 
             if (!nowTarget)
-                nowTarget = attackQ.Dequeue();
+            {
+                if (attackQ.Count > 0)
+                    nowTarget = attackQ.Dequeue();
+            }
 
-            if (coolTime >= coolTimeckr)
+            if (coolTime >= coolTimeckr && nowTarget)
             {
                 //Debug.Log("attack");
                 coolTime = 0.0f;
@@ -200,7 +199,20 @@ public class TowerScript : MonoBehaviour
             
             SetLayerRecursively(unit, myLayer);
         }
-    }    
+    }
+
+    //유닛이 충돌 체크 범위 안에 들어왔을때 공격 큐에 넣음.
+    void OnTriggerEnter(Collider other)
+    {
+        //Debug.Log("Collision Enter " + gameObject.name  + " " + other.name);
+
+        if (other.gameObject.layer == enemyLayer)
+        {
+            //Debug.Log("mylayer " + gameObject.name + " "  + gameObject.layer);
+            //Debug.Log("otherlayer " + other.name + " " + other.gameObject.layer);
+            attackQ.Enqueue(other.gameObject);
+        }
+    }
 
     void SetLayerRecursively(GameObject obj, int newLayer)
     {

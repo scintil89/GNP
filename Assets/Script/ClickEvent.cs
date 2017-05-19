@@ -70,33 +70,34 @@ public class ClickEvent : MonoBehaviour
             //Debug.Log("Right Button Clicked");
 
             //tempObject가 클릭중인지 검사
-            if( tempObject.GetComponent<UnitScript>().isTouching() == true)
-            {
-                Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
-                RaycastHit hitObj;
-
-                if (Physics.Raycast(ray, out hitObj, 200.0f))
+            if(tempObject)
+                if( tempObject.GetComponent<UnitScript>().isTouching() == true)
                 {
-                    //Debug.Log(hitObj.transform.gameObject.name);
+                    Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
+                    RaycastHit hitObj;
 
-                    if (hitObj.transform.gameObject.layer == 11) //클릭한 오브젝트가 애너미인가
+                    if (Physics.Raycast(ray, out hitObj, 200.0f))
                     {
                         //Debug.Log(hitObj.transform.gameObject.name);
 
-                        if (tempObject.GetComponent<UnitScript>())
+                        if (hitObj.transform.gameObject.layer == 11) //클릭한 오브젝트가 애너미인가
                         {
-                            tempObject.GetComponent<UnitScript>().target = hitObj.transform;
+                            //Debug.Log(hitObj.transform.gameObject.name);
+
+                            if (tempObject.GetComponent<UnitScript>())
+                            {
+                                tempObject.GetComponent<UnitScript>().target = hitObj.transform;
+                            }
+
+                            //Debug.Log(tempObject.GetComponent<UnitScript>().target);
+
+                            //else if (gameObject.GetComponent<KnightScript>())
+                            //{
+                            //    gameObject.GetComponent<KnightScript>().target = hitObj.transform;
+                            //}
                         }
-
-                        //Debug.Log(tempObject.GetComponent<UnitScript>().target);
-
-                        //else if (gameObject.GetComponent<KnightScript>())
-                        //{
-                        //    gameObject.GetComponent<KnightScript>().target = hitObj.transform;
-                        //}
                     }
-                }
-            }            
+                }            
         }
     }
 }

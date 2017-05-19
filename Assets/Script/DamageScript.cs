@@ -4,17 +4,9 @@ using System.Collections;
 public class DamageScript : MonoBehaviour
 {
     //데미지 처리를 하는 스크립트.
-    enum state
-    {
-        LIVE = 0,
-        DEAD = 1,
-        DYING = 2
-    }
-
-    state nowState;
-
     public int hp;
-    public string destroyParticle = "FireExplosion";
+    //public string destroyParticle = "FireExplosion";
+    public GameObject destroyParticle;
 
     //the HP Particle
     public GameObject HPParticle;
@@ -23,11 +15,6 @@ public class DamageScript : MonoBehaviour
     //Default Forces
     public Vector3 DefaultForce = new Vector3(0f, 1f, 0f);
     public float DefaultForceScatter = 0.5f;
-
-    void Awake()
-    {
-        nowState = state.LIVE;
-    }
 
     public bool isExist()
     {
@@ -49,7 +36,8 @@ public class DamageScript : MonoBehaviour
         }
         else
         {
-            StartCoroutine( DeadProcess() );
+            if(gameObject.activeSelf == true) //Don't Use .active
+                StartCoroutine( DeadProcess() );
         }
     }
 
@@ -76,32 +64,33 @@ public class DamageScript : MonoBehaviour
 
     IEnumerator DeadProcess() //IEnumerator
     {
-        //Debug.Log("DeadProcess " + gameObject.name);
-        yield return new WaitForSeconds(0.5f);
+        //TODO : 파티클을 메모리풀로 관리했을시 사용된 후의 파티클을 재사용 못하는 문제 발생
+        //GameObject particle = MemoryPoolManager.Instance.Get(destroyParticle);
+        GameObject particle = Instantiate(destroyParticle) as GameObject;
+        particle.SetActive(false);
 
-        GameObject particle = MemoryPoolManager.Instance.Get(destroyParticle);
+
+        yield return new WaitForSeconds(0.9f);
+
+
         particle.transform.position = gameObject.transform.position;
+        particle.SetActive(true);
 
-        yield return new WaitForSeconds(0.5f);
+        //Debug.Log("DeadProcess " + gameObject.name);
 
-        MemoryPoolManager.Instance.Free(particle);
-
-        //Debug.Log("DeadProcess after particle free" + gameObject.name);
-
-        //yield return new WaitForSeconds(0.5f);
+        //yield return new WaitForSeconds(1.0f);
 
         MemoryPoolManager.Instance.Free(gameObject);
+
+
+        //MemoryPoolManager.Instance.Free(particle);
+        //Debug.Log("DeadProcess after particle free" + gameObject.name);
+
+        //destroyParticle.SetActive(false);
+        //DestroyObject(particle);
+
+        //TODO : 타워...  
         
        //Debug.Log("DeadProcess after gameObject free" + gameObject.name);
     }
-        
-    // Update is called once per frame
-    //void Update ()
-    //{
-    //    if (isExist() == false)
-    //    {
-    //        StartCoroutine(DeadProcess());
-    //        //DeadProcess();
-    //    }
-    //}
 }

@@ -15,32 +15,35 @@ public enum MAGESTATE
 
 public class MageScript : UnitScript
 {
-    //public GameObject magicObject; //유닛의 스킬 이펙트 오브젝트
+    public GameObject magicObject; //유닛의 스킬 이펙트 오브젝트
 
     public GameObject outline1; //유닛 자체의 아웃라인
     public GameObject outline2; //유닛이 들고 있는 지팡이의 아웃라인
 
     float moveSpeed = 5.0f;         
     float rotationSpeed = 10.0f;     
-    float attackableRange = 10.5f;
-    int normalDamage = 10;
+    float attackAbleRange = 10.5f;
+    public int normalDamage = 10;
 
     //스킬 관련 변수
-    int magicDamage = 25;   
+    public int magicDamage = 25;
+    public float skillAbleRange = 40.0f;
+    float dist = 1000; //초기값
     bool skillCkr = false;
     float skillCoolTime = 5.0f;
+   // public skillCoolTimeCkr = 5.0f;
 
-//     bool isTouch = false;
-// 
-//     public void Touching()
-//     {
-//         isTouch = !isTouch;
-//     }
-// 
-//     void Targeting()
-//     {
-//         target = gameObject.GetComponent<UnitClickScript>().target;
-//     }
+    //bool isTouch = false;
+    //
+    //public void Touching()
+    //{
+    //    isTouch = !isTouch;
+    //}
+    //
+    //void Targeting()
+    //{
+    //    target = gameObject.GetComponent<UnitClickScript>().target;
+    //}
 
     // Animation
     public MAGESTATE state = MAGESTATE.free;
@@ -55,9 +58,23 @@ public class MageScript : UnitScript
     // Use this for initialization
     void Start ()
     {
+        //오브잭트 재스폰시 타겟초기화
+        //Debug.Log("eeeeee");
+        //target = null;
+
         characterController = GetComponent<CharacterController>();
         outline1.SetActive(false);
         outline2.SetActive(false);
+
+        if (gameObject.layer == 10)
+        {
+            enemyLayer = 11;
+        }
+
+        else if (gameObject.layer == 11)
+        {
+            enemyLayer = 10;
+        }
     }
 	
     void Awake()
@@ -75,7 +92,7 @@ public class MageScript : UnitScript
         dicState[MAGESTATE.skill]   = Skill;
         dicState[MAGESTATE.death]   = Death;
 
-        InitMage();
+        InitMage();       
     }
 
     void InitMage()
@@ -107,7 +124,7 @@ public class MageScript : UnitScript
 
         Vector3 dir = target.position - transform.position;
 
-        if (dir.magnitude > attackableRange)
+        if (dir.magnitude > attackAbleRange)
         {
             //Debug.Log("======================" + dir.magnitude);
 
@@ -140,7 +157,7 @@ public class MageScript : UnitScript
 
         Vector3 dir = target.position - transform.position;
 
-        if (dir.magnitude > attackableRange)
+        if (dir.magnitude > attackAbleRange)
         {
             state = MAGESTATE.free;
         }
@@ -162,8 +179,9 @@ public class MageScript : UnitScript
 
                 target.gameObject.GetComponent<DamageScript>().Hit(magicDamage);
 
-                //GameObject magic = Instantiate(magicObject) as GameObject;
-                GameObject magic = MemoryPoolManager.Instance.Get("Flamestrike");
+                GameObject magic = Instantiate(magicObject) as GameObject;
+                //GameObject magic = MemoryPoolManager.Instance.Get("Flamestrike");
+
                 if (!magic)
                 {
                     Debug.LogError("MageScript magic Get Failed");
@@ -185,16 +203,13 @@ public class MageScript : UnitScript
 
     void Death()
     {
-        //Destroy(gameObject);
-        gameObject.SetActive(false);
-
         state = MAGESTATE.none;
     }
 
     void OnGUI()
     {
         //set cool time
-        if (isTouching() == true)
+        if (isTouching() == true && dist < skillAbleRange)
         {
             if (GUI.Button(new Rect(20, 30, 100, 30), "Magic"))
             {
@@ -203,6 +218,8 @@ public class MageScript : UnitScript
                     state = MAGESTATE.skill;
 
                     skillCoolTime = 0.0f;
+
+                    //Debug.Log(dist);
                 }
             }
         }
@@ -211,13 +228,24 @@ public class MageScript : UnitScript
     // Update is called once per frame
     void Update()
     {
-        //Animation
-        if (target)
-            dicState[state]();
+        //if (target = null)
+        //{
+        //    Debug.Log("eeeeee");
+        //    if (gameObject.layer == 10)
+        //        target = GameObject.Find("GameObject").GetComponent<GameManagerScript>().MainTower_Enemy.transform;
+        //    else if (gameObject.layer == 11)
+        //        target = GameObject.Find("GameObject").GetComponent<GameManagerScript>().MainTower_My.transform;
+        //}
 
-        skillCoolTime += Time.deltaTime;
+        //스킬 사용 거리
+        if (target != null)
+        {
+            float deltaX = target.position.x - transform.position.x;
+            float deltaZ = target.position.z - transform.position.z;
+            dist = Mathf.Sqrt(deltaX * deltaX + deltaZ * deltaZ);
+        }
 
-
+        //OutLine 제어
         if (isTouching() == true)
         {
             outline1.SetActive(true);
@@ -227,6 +255,29 @@ public class MageScript : UnitScript
         {
             outline1.SetActive(false);
             outline2.SetActive(false);
+        }
+
+        //Animation
+        if (!target) //타겟이 없으면 Idle 상태
+        {
+            return;
+        }
+        else if (target.gameObject.activeSelf == false)
+        {
+            target = null;
+        }
+        else
+            dicState[state]();
+
+        skillCoolTime += Time.deltaTime;
+    }
+
+    void OnCollisionEnter(Collision collision)
+    {
+        //충돌이 발생하면 충돌한 물체를 타겟으로 변경
+        if (collision.gameObject.layer == enemyLayer)
+        {
+            target = collision.gameObject.transform;
         }
     }
 }

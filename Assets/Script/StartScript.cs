@@ -11,7 +11,7 @@ public class StartScript : MonoBehaviour
 
     IEnumerator LoadLevel()
     {
-        float fadeTime = GameObject.Find("SceneManager").GetComponent<SceneChange>().BeginFade(1);
+        float fadeTime = GameObject.Find("SceneManager").GetComponent<SceneChangeScript>().BeginFade(1);
         yield return new WaitForSeconds(fadeTime);
 
         SceneManager.LoadScene("GNP");

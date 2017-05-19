@@ -2,7 +2,7 @@
 using UnityEngine.SceneManagement;
 using System.Collections;
 
-public class SceneChange : MonoBehaviour
+public class SceneChangeScript: MonoBehaviour
 {
     //씬 이동시 Fade in / out을 위한 스크립트입니다.
     //이 스크립트를 가지는 오브젝트는 씬이 이동되어도 파괴되면 안됩니다.
@@ -50,7 +50,7 @@ public class SceneChange : MonoBehaviour
     void OnLevelLoadedEffect(Scene scene, LoadSceneMode mode)
     {
         //TODO : 레벨 로딩 단계적으로 하기
-        GameObject.Find("SceneManager").GetComponent<SceneChange>().BeginFade(-1);
+        GameObject.Find("SceneManager").GetComponent<SceneChangeScript>().BeginFade(-1);
     }
 
     //     public enum SceneState

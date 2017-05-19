@@ -18,13 +18,13 @@ public class GameManagerScript : MonoBehaviour
 	// Update is called once per frame
 	void Update ()
     {
-	    if(!MainTower_My)
+	    if( !MainTower_My.GetComponent<DamageScript>().isExist() )
         {
             state = true;
             Time.timeScale = 0.0f;
         }
 
-        if (!MainTower_Enemy)
+        if ( !MainTower_Enemy.GetComponent<DamageScript>().isExist())
         {
             state = true;
             Time.timeScale = 0.0f;

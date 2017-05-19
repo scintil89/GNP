@@ -109,6 +109,7 @@ public class MemoryPoolManager : MonoBehaviour // : Singleton
         if( !memorypoolList.ContainsKey(key) )
         {
             Debug.Log("MemoryPoolManager Free error : " + key);
+            obj.SetActive(false);
             return;
         }
 

@@ -3,7 +3,7 @@ using System.Collections;
 
 public class CameraWorking : MonoBehaviour
 {
-    public Transform characterTransform;
+    //public Transform characterTransform;
     Transform tempTransform;
 
 //    bool test = false;
