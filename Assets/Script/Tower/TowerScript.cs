@@ -12,11 +12,6 @@ public class TowerScript : MonoBehaviour
     public string spawnUnit; 
 
     public GameObject towerAttackParticle; //타워의 공격 파티클
-    //GameObject[] particlePool = null;
-    //public MemoryPoolScript towerAttackPool;// = new MemoryPoolScript(); //(towerAttack, "towerAttack", 10)
-    //public GameObject spawnUnit; //타워가 소환하는 유닛
-    //GameObject[] spawnUnitPool = null;
-    //public MemoryPoolScript spawnUnitPool;// = new MemoryPoolScript(); //(spawnUnit, "spawnUnit", 10)
 
     //float attackRange = 11.0f;
 
@@ -34,7 +29,7 @@ public class TowerScript : MonoBehaviour
     //int UnitCkr = 0;
 
     public int towerDamage = 25;
-    Queue<GameObject> attackQ = new Queue<GameObject>();
+    List<GameObject> attackQ = new List<GameObject>();
 
     public float coolTimeckr = 3.0f;
     float coolTime = 3.0f;
@@ -56,7 +51,6 @@ public class TowerScript : MonoBehaviour
         //spawnUnitPool.InitPoolSetting(spawnUnit, "spawnUnit", 10);
         //spawnUnitPool.InitObjPool();
 
-
         myLayer = gameObject.layer;
 
         //소환 방향 초기화
@@ -76,19 +70,12 @@ public class TowerScript : MonoBehaviour
 
     void Attack(GameObject target)
     {
-        if (!target)
-        {
-            return;
-        }
-
+        //명확하지 않은 타겟일 경우 공격을 스킵한다.
         if (!target.GetComponent<DamageScript>().isExist())
         { 
             Debug.Log("Unattackable target");
 
-            if (attackQ.Count > 0)
-                nowTarget = attackQ.Dequeue();
-            else
-                nowTarget = null;
+            nowTarget = null;
 
             return;
         }
@@ -103,13 +90,12 @@ public class TowerScript : MonoBehaviour
         //    return;
         //}
 
-
         //공격 파티클 포지션 생성, 포지션 설정
-        //GameObject particle = MemoryPoolManager.Instance.Get(towerAttack);
-        GameObject particle = Instantiate(towerAttackParticle) as GameObject;
+        GameObject particle = Instantiate(towerAttackParticle) as GameObject;         //GameObject particle = MemoryPoolManager.Instance.Get(towerAttack);
         if (!particle)
         {
-            Debug.LogError("TowerScript particle Failed " );
+            Debug.LogError("TowerScript particle instantiate Failed " );
+
             return;
         }
 
@@ -139,23 +125,22 @@ public class TowerScript : MonoBehaviour
         coolTime += Time.deltaTime;
         deltaSpawnTime += Time.deltaTime;
 
-        //타워 공격
-        if (attackQ.Count != 0)
+        //타워 타겟팅
+        if (!nowTarget || !nowTarget.activeSelf)
         {
-            //Debug.Log("attackQ.count != 0 in");
-
-            if (!nowTarget)
+            if (attackQ.Count > 0)
             {
-                if (attackQ.Count > 0)
-                    nowTarget = attackQ.Dequeue();
+                nowTarget = attackQ[0];
+                attackQ.RemoveAt(0);
             }
+        }
 
-            if (coolTime >= coolTimeckr && nowTarget)
-            {
-                //Debug.Log("attack");
-                coolTime = 0.0f;
-                Attack(nowTarget);
-            }
+        //타워 공격
+        if (coolTime >= coolTimeckr && nowTarget)
+        {
+            //Debug.Log("attack");
+            coolTime = 0.0f;
+            Attack(nowTarget);
         }
 
         //유닛 스폰
@@ -184,19 +169,20 @@ public class TowerScript : MonoBehaviour
                 if (unit.GetComponent<MageScript>()) //유닛이 메이지일경우
                 {
                     //Debug.Log("test");
-                    unit.GetComponent<MageScript>().target = GameObject.Find("MyWallGate").transform;
+                    unit.GetComponent<MageScript>().target = GameObject.Find("MyWallGate");
                 }
                 else if (unit.GetComponent<KnightScript>()) //유닛이 나이트일경우
                 {
                     //Debug.Log("test");
-                    unit.GetComponent<KnightScript>().target = GameObject.Find("MyWallGate").transform;
+                    unit.GetComponent<KnightScript>().target = GameObject.Find("MyWallGate");
                 }
             }
 
-            float x = transform.position.x;
-            float z = transform.position.z + spawnDirection;
-            unit.transform.position = new Vector3(x, 1.0f, z);
-            
+            //float x = transform.position.x;
+            //float z = transform.position.z + spawnDirection;
+            //unit.transform.position = new Vector3(x, 1.0f, z);
+            unit.transform.position = spawnPosition;
+
             SetLayerRecursively(unit, myLayer);
         }
     }
@@ -210,7 +196,7 @@ public class TowerScript : MonoBehaviour
         {
             //Debug.Log("mylayer " + gameObject.name + " "  + gameObject.layer);
             //Debug.Log("otherlayer " + other.name + " " + other.gameObject.layer);
-            attackQ.Enqueue(other.gameObject);
+            attackQ.Add(other.gameObject);
         }
     }
 
@@ -234,83 +220,3 @@ public class TowerScript : MonoBehaviour
         }
     }
 }
-
-
-
-// Start()
-//particlePool = new GameObject[poolSize];
-//
-//for (int i = 0; i < 10; ++i)
-//{
-//    particlePool[i] = Instantiate(towerAttack) as GameObject;
-//    particlePool[i].name = "towerAttack" + i;
-//    particlePool[i].SetActive(false);
-//}
-
-//spawnUnitPool = new GameObject[poolSize];
-//
-//for (int i = 0; i < poolSize; ++i)
-//{
-//    spawnUnitPool[i] = Instantiate(spawnUnit) as GameObject;
-//    spawnUnitPool[i].name = spawnUnit.name + i;
-//    if (myLayer == 11)
-//    {
-//        spawnUnitPool[i].transform.rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
-//
-//        if (spawnUnitPool[i].GetComponent<MageScript>())
-//        {
-//            //Debug.Log("test");
-//            spawnUnitPool[i].GetComponent<MageScript>().target = GameObject.Find("MyWallGate").transform;
-//        }
-//        else if (spawnUnitPool[i].GetComponent<KnightScript>())
-//        {
-//            //Debug.Log("test");
-//            spawnUnitPool[i].GetComponent<KnightScript>().target = GameObject.Find("MyWallGate").transform;
-//        }
-//    }
-//    spawnUnitPool[i].transform.position = spawnPosition;
-//
-//    SetLayerRecursively(spawnUnitPool[i], myLayer);
-//
-//    spawnUnitPool[i].SetActive(false);
-//}
-
-
-//update
-//if(UnitCkr == poolSize)
-//{
-//    for(int i = 0; i < poolSize; i++)
-//    {
-//        if( !spawnUnitPool[i] )
-//        {
-//            spawnUnitPool[i] = Instantiate(spawnUnit) as GameObject;
-//            spawnUnitPool[i].name = spawnUnit.name + i;
-//
-//            상대 타워 소환시 타겟 설정
-//            if (myLayer == 11)
-//            {
-//                spawnUnitPool[i].transform.rotation = Quaternion.Euler(0.0f, 180.0f, 0.0f);
-//
-//                if (spawnUnitPool[i].GetComponent<MageScript>())
-//                {
-//                    //Debug.Log("test");
-//                    spawnUnitPool[i].GetComponent<MageScript>().target = GameObject.Find("MyWallGate").transform;
-//                }
-//                else if (spawnUnitPool[i].GetComponent<KnightScript>())
-//                {
-//                    //Debug.Log("test");
-//                    spawnUnitPool[i].GetComponent<KnightScript>().target = GameObject.Find("MyWallGate").transform;
-//                }
-//            }
-//            float x = transform.position.x;
-//            float z = transform.position.z + spawnDirection;
-//            spawnUnitPool[i].transform.position = new Vector3(x, 1.0f, z);
-//
-//            SetLayerRecursively(spawnUnitPool[i], myLayer);
-//
-//            spawnUnitPool[i].SetActive(false);
-//        }
-//
-//    }
-//}
-//

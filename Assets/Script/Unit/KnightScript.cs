@@ -2,28 +2,21 @@
 using System.Collections;
 using System.Collections.Generic;
 
-
 public enum KNIGHTSTATE
 {
     none,
     idle = -1,
     walk = 0,
     attack,
+    opponent,
 }
 
 public class KnightScript : UnitScript
 {
-    public GameObject outline;
-
     float moveSpeed = 5.0f;
     float rotationSpeed = 10.0f;
-    float attackableRange = 12.0f;
+    float attackAbleRange = 8.0f;
     int normalDamage = 15;
-
-//     void Targeting()
-//     {
-//         target = gameObject.GetComponent<UnitClickScript>().target;
-//     }
 
     // Animation
     public KNIGHTSTATE state = KNIGHTSTATE.attack;
@@ -32,47 +25,40 @@ public class KnightScript : UnitScript
     public Animation anim;
     CharacterController characterController = null;
 
+    [SerializeField]
     Dictionary<KNIGHTSTATE, System.Action> dicState = new Dictionary<KNIGHTSTATE, System.Action>();
 
+    //이동중 마주친 상대
+    public GameObject opponent = null;
 
     // Use this for initialization
     void Start ()
     {
-        //오브잭트 재스폰시 타겟초기화
-        Debug.Log("eeeeee");
-        target = null;
-
         characterController = GetComponent<CharacterController>();
-
-        outline.SetActive(false);
-
-        if (gameObject.layer == 10)
-        {
-            enemyLayer = 11;
-        }
-
-        else if (gameObject.layer == 11)
-        {
-            enemyLayer = 10;
-        }
-
-        InitKnight();
     }
 
     void Awake()
     {
+        //오브잭트 재스폰시 타겟초기화
+        target = null;
+        opponent = null;
+
+        //애니메이션 자료구조 초기화
         anim = GetComponent<Animation>();
         characterController = GetComponent<CharacterController>();
 
         dicState[KNIGHTSTATE.none] = None;
         dicState[KNIGHTSTATE.idle] = Idle;
         dicState[KNIGHTSTATE.walk] = Walk;
-        dicState[KNIGHTSTATE.attack] = Attack;       
+        dicState[KNIGHTSTATE.attack] = Attack;
+        dicState[KNIGHTSTATE.opponent] = Opponent;
+
+        InitKnight();
     }
 
     void InitKnight()
     {
-        anim.Play("WK_heavy_infantry_05_combat_idle");
+        state = KNIGHTSTATE.idle;
     }
 
     void None()
@@ -83,36 +69,56 @@ public class KnightScript : UnitScript
     void Idle()
     {
         //Debug.Log("Idle ================================= ");
+        anim.Play("WK_heavy_infantry_05_combat_idle");
 
         stateTime += Time.deltaTime;
         if (stateTime >= idleStateMaxTime)
         {
-            stateTime = 0.0f;
-            state = KNIGHTSTATE.walk;
+            //target이 있으면
+            if (target && target.gameObject.activeSelf)
+            {
+                state = KNIGHTSTATE.walk;
+                stateTime = 0.0f;
+            }
         }
-
-        anim.Play("WK_heavy_infantry_05_combat_idle");
     }
 
     void Walk()
     {
-        //Debug.Log("Move ================================= ");
+        //Debug.Log("KnightScript Walk");
+
+        //Play Animation
         anim.Play("WK_heavy_infantry_06_combat_walk");
 
-        Vector3 dir = target.position - transform.position;
+        //WayNode 방향 벡터
+        Vector3 toward = dst - transform.position;
 
-        if (dir.magnitude > attackableRange)
+        //목적지 Node dst가 가까우면 새로운 목적지 설정
+        if (toward.magnitude < 2.0f)
         {
-            //Debug.Log("======================" + dir.magnitude);
-
-            dir.Normalize();
-            characterController.SimpleMove(dir * moveSpeed);
-
-            transform.rotation = Quaternion.Lerp(transform.rotation,
-                                                    Quaternion.LookRotation(dir),
-                                                    rotationSpeed * Time.deltaTime);
+            if (gameObject.GetComponent<WayPoint>().way.Count > 0)
+            {
+                dst = gameObject.GetComponent<WayPoint>().way.Pop();
+            }
+            else
+            {
+                Debug.Log("KnightScript Walk : Way Zero");
+            }
         }
-        else
+        
+        //toward 방향으로 이동
+        toward.Normalize();
+        characterController.SimpleMove(toward * moveSpeed);
+        //toward 방향으로 회전
+        transform.rotation = Quaternion.Lerp(transform.rotation,
+            Quaternion.LookRotation(toward),
+            rotationSpeed * Time.deltaTime);
+
+        //target과의 거리
+        Vector3 targetdist = target.transform.position - transform.position;
+
+        //target과의 거리 < 공격 가능 범위
+        if (targetdist.magnitude < attackAbleRange)
         {
             stateTime = 2.0f;
             state = KNIGHTSTATE.attack;
@@ -124,6 +130,17 @@ public class KnightScript : UnitScript
         //Debug.Log("Attack ================================= ");
         //anim.Play("attack");
 
+        //target이 non active상태면
+        if (!target || !target.gameObject.activeSelf)
+        {
+            target = RayCastFront(100.0f).gameObject;
+
+            state = KNIGHTSTATE.idle;
+
+            return;
+        }
+
+        //Play Attack Animation
         stateTime += Time.deltaTime;
         if (stateTime > 2.0f)
         {
@@ -134,46 +151,71 @@ public class KnightScript : UnitScript
             target.gameObject.GetComponent<DamageScript>().Hit(normalDamage);
         }
 
-        Vector3 dir = target.position - transform.position;
+        Vector3 dir = target.transform.position - transform.position;
 
-        if (dir.magnitude > attackableRange)
+        if (dir.magnitude > attackAbleRange)
+        {
+            state = KNIGHTSTATE.idle;
+        }
+    }
+
+    void Opponent()
+    {
+        if(!opponent || !opponent.gameObject.activeSelf)
         {
             state = KNIGHTSTATE.idle;
         }
 
+        stateTime += Time.deltaTime;
+        if (stateTime > 2.0f)
+        {
+            stateTime = 0.0f;
+            anim.Play("WK_heavy_infantry_08_attack_B");
+            anim.PlayQueued("WK_heavy_infantry_05_combat_idle", QueueMode.CompleteOthers);
+
+            opponent.gameObject.GetComponent<DamageScript>().Hit(normalDamage);
+        }
+
+        Vector3 dir = opponent.transform.position - transform.position;
+
+        if (dir.magnitude > attackAbleRange)
+        {
+            state = KNIGHTSTATE.idle;
+        }
     }
 
     // Update is called once per frame
     void Update ()
     {
-        //OutLine 제어
-        if (isTouching() == true)
+        opponent = RayCastFront(5.0f);
+        if(opponent)
         {
-            outline.SetActive(true);
-        }
-        else
-        {
-            outline.SetActive(false);
+
         }
 
-        if (!target) //타겟이 없으면 Idle 상태
+        if (!target || !target.gameObject.activeSelf) //타겟이 없으면 Idle 상태
         {
-            return;
-        }
-        else if(target.gameObject.activeSelf == false)
-        {
-            target = null;
+            //find target
+            var t =  RayCastFront(100.0f);
+        
+            if(t)
+            {
+                Targeting(t);
+            }
         }
         else
+        {
             dicState[state]();
-    }
-
-    void OnCollisionEnter(Collision collision)
-    {
-        //충돌이 발생하면 충돌한 물체를 타겟으로 변경
-        if(collision.gameObject.layer != gameObject.layer)
-        {
-            target = collision.gameObject.transform;
         }
     }
+
+    
+    //void OnCollisionEnter(Collision collision)
+    //{
+    //    //충돌이 발생하면 충돌한 물체를 타겟으로 변경
+    //    if(collision.gameObject.layer != gameObject.layer)
+    //    {
+    //        Targeting(collision.gameObject);
+    //    }
+    //}
 }

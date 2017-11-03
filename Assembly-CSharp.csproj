@@ -75,6 +75,7 @@
      <Compile Include="Assets\Script\DamageScript.cs" />
      <Compile Include="Assets\Script\GameManagerScript.cs" />
      <Compile Include="Assets\Script\MemoryPoolManager.cs" />
+     <Compile Include="Assets\Script\Node.cs" />
      <Compile Include="Assets\Script\SceneChangeScript.cs" />
      <Compile Include="Assets\Script\Singleton.cs" />
      <Compile Include="Assets\Script\StartScript.cs" />

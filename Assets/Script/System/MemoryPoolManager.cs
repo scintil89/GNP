@@ -49,8 +49,8 @@ public class MemoryPoolManager : MonoBehaviour // : Singleton
             MemoryPool memoryPool = new MemoryPool();
             memoryPool.source = poolList[i];
             memorypoolList[poolList[i].name] = memoryPool;
-
-            Debug.Log("InitObjPool : poolList[i].name" + poolList[i]);
+            
+            Debug.Log("InitObjPool : " + poolList[i].name);
 
             //Hierarchy에 추가
             GameObject folder = new GameObject();

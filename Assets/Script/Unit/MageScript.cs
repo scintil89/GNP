@@ -17,9 +17,6 @@ public class MageScript : UnitScript
 {
     public GameObject magicObject; //유닛의 스킬 이펙트 오브젝트
 
-    public GameObject outline1; //유닛 자체의 아웃라인
-    public GameObject outline2; //유닛이 들고 있는 지팡이의 아웃라인
-
     float moveSpeed = 5.0f;         
     float rotationSpeed = 10.0f;     
     float attackAbleRange = 10.5f;
@@ -32,18 +29,6 @@ public class MageScript : UnitScript
     bool skillCkr = false;
     float skillCoolTime = 5.0f;
    // public skillCoolTimeCkr = 5.0f;
-
-    //bool isTouch = false;
-    //
-    //public void Touching()
-    //{
-    //    isTouch = !isTouch;
-    //}
-    //
-    //void Targeting()
-    //{
-    //    target = gameObject.GetComponent<UnitClickScript>().target;
-    //}
 
     // Animation
     public MAGESTATE state = MAGESTATE.free;
@@ -58,36 +43,21 @@ public class MageScript : UnitScript
     // Use this for initialization
     void Start ()
     {
-        //오브잭트 재스폰시 타겟초기화
-        //Debug.Log("eeeeee");
-        //target = null;
-
         characterController = GetComponent<CharacterController>();
-        outline1.SetActive(false);
-        outline2.SetActive(false);
-
-        if (gameObject.layer == 10)
-        {
-            enemyLayer = 11;
-        }
-
-        else if (gameObject.layer == 11)
-        {
-            enemyLayer = 10;
-        }
     }
 	
     void Awake()
     {
-        //애니메이션 자료구조 초기화
-        //target = GetComponent<UnitClickScript>().target;
+        //오브잭트 재스폰시 타겟초기화
+        target = null;
 
+        //애니메이션 자료구조 초기화
         anim = GetComponent<Animation>();
         characterController = GetComponent<CharacterController>();
 
         dicState[MAGESTATE.none]    = None;
         dicState[MAGESTATE.free]    = Idle;
-        dicState[MAGESTATE.walk]    = Move;
+        dicState[MAGESTATE.walk]    = Walk;
         dicState[MAGESTATE.attack]  = Attack;
         dicState[MAGESTATE.skill]   = Skill;
         dicState[MAGESTATE.death]   = Death;
@@ -117,21 +87,38 @@ public class MageScript : UnitScript
         }
     }
 
-    void Move()
+    void Walk()
     {
-        //Debug.Log("Move ================================= ");
+        //Debug.Log("Walk ================================= ");
         anim.Play("walk");
 
-        Vector3 dir = target.position - transform.position;
 
-        if (dir.magnitude > attackAbleRange)
+
+
+
+
+
+
+
+
+
+
+
+
+
+        //Target과의 거리
+        Vector3 targetdist = target.transform.position - transform.position;
+
+        //공격 가능 범위보다 멀면
+        if (targetdist.magnitude > attackAbleRange)
         {
-            //Debug.Log("======================" + dir.magnitude);
 
-            dir.Normalize();
-            characterController.SimpleMove(dir * moveSpeed);
+            targetdist.Normalize();
+            characterController.SimpleMove(targetdist * moveSpeed);
 
-            transform.rotation = Quaternion.Lerp(transform.rotation, Quaternion.LookRotation(dir), rotationSpeed * Time.deltaTime);
+            transform.rotation = Quaternion.Lerp(transform.rotation, 
+                Quaternion.LookRotation(targetdist), 
+                rotationSpeed * Time.deltaTime);
         }
         else
         {
@@ -155,7 +142,7 @@ public class MageScript : UnitScript
             target.gameObject.GetComponent<DamageScript>().Hit(normalDamage);
         }
 
-        Vector3 dir = target.position - transform.position;
+        Vector3 dir = target.transform.position - transform.position;
 
         if (dir.magnitude > attackAbleRange)
         {
@@ -188,7 +175,7 @@ public class MageScript : UnitScript
                     return;
                 }
 
-                magic.transform.position = target.position;
+                magic.transform.position = target.transform.position;
             }
         }
 
@@ -209,7 +196,7 @@ public class MageScript : UnitScript
     void OnGUI()
     {
         //set cool time
-        if (isTouching() == true && dist < skillAbleRange)
+        if (isTouch && dist < skillAbleRange)
         {
             if (GUI.Button(new Rect(20, 30, 100, 30), "Magic"))
             {
@@ -228,33 +215,12 @@ public class MageScript : UnitScript
     // Update is called once per frame
     void Update()
     {
-        //if (target = null)
-        //{
-        //    Debug.Log("eeeeee");
-        //    if (gameObject.layer == 10)
-        //        target = GameObject.Find("GameObject").GetComponent<GameManagerScript>().MainTower_Enemy.transform;
-        //    else if (gameObject.layer == 11)
-        //        target = GameObject.Find("GameObject").GetComponent<GameManagerScript>().MainTower_My.transform;
-        //}
-
         //스킬 사용 거리
         if (target != null)
         {
-            float deltaX = target.position.x - transform.position.x;
-            float deltaZ = target.position.z - transform.position.z;
-            dist = Mathf.Sqrt(deltaX * deltaX + deltaZ * deltaZ);
-        }
+            Vector3 a = target.transform.position - transform.position;
 
-        //OutLine 제어
-        if (isTouching() == true)
-        {
-            outline1.SetActive(true);
-            outline2.SetActive(true);
-        }
-        else
-        {
-            outline1.SetActive(false);
-            outline2.SetActive(false);
+            dist = a.magnitude;
         }
 
         //Animation
@@ -277,7 +243,7 @@ public class MageScript : UnitScript
         //충돌이 발생하면 충돌한 물체를 타겟으로 변경
         if (collision.gameObject.layer == enemyLayer)
         {
-            target = collision.gameObject.transform;
+            target = collision.gameObject;
         }
     }
 }

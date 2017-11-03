@@ -17,7 +17,7 @@ public class ClickEvent : MonoBehaviour
     { 
         if (Input.GetMouseButtonDown(0)) //마우스 왼쪽 클릭
         {
-            //Debug.Log("Left Button Clicked");
+            //Debug.Log("ClickEvent : Left Button Clicked");
 
             Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
             RaycastHit hitObj;
@@ -28,10 +28,10 @@ public class ClickEvent : MonoBehaviour
 
                 if(tempObject) //탬프 오브젝트가 있는가?
                 {
-                    if (tempObject.GetComponent<UnitScript>().isTouching() == true) //오브젝트가 현재 클릭중인가
+                    if (tempObject.GetComponent<UnitScript>().isTouch) //오브젝트가 현재 클릭중인가
                     {
                         //클릭 해제
-                        tempObject.GetComponent<UnitScript>().UnTouching();
+                        tempObject.GetComponent<UnitScript>().isTouch = false;
                     }
                 }
 
@@ -47,11 +47,11 @@ public class ClickEvent : MonoBehaviour
                             {
                                 tempObject = hitObj.transform.gameObject; //새로 클릭한 오브젝트로 대체
 
-                                hitObj.transform.gameObject.GetComponent<UnitScript>().Touching();
+                                hitObj.transform.gameObject.GetComponent<UnitScript>().isTouch = true;
 
                                 if (tempObject)
                                 {
-                                    tempObject.GetComponent<UnitScript>().Touching();
+                                    tempObject.GetComponent<UnitScript>().isTouch = true;
                                     tempObject = hitObj.transform.gameObject;
                                 }
                             }
@@ -71,7 +71,7 @@ public class ClickEvent : MonoBehaviour
 
             //tempObject가 클릭중인지 검사
             if(tempObject)
-                if( tempObject.GetComponent<UnitScript>().isTouching() == true)
+                if( tempObject.GetComponent<UnitScript>().isTouch == true)
                 {
                     Ray ray = Camera.main.ScreenPointToRay(Input.mousePosition);
                     RaycastHit hitObj;
@@ -80,21 +80,14 @@ public class ClickEvent : MonoBehaviour
                     {
                         //Debug.Log(hitObj.transform.gameObject.name);
 
-                        if (hitObj.transform.gameObject.layer == 11) //클릭한 오브젝트가 애너미인가
+                        if (hitObj.collider.gameObject.layer == 11) //클릭한 오브젝트가 애너미인가
                         {
                             //Debug.Log(hitObj.transform.gameObject.name);
 
                             if (tempObject.GetComponent<UnitScript>())
                             {
-                                tempObject.GetComponent<UnitScript>().target = hitObj.transform;
+                                tempObject.GetComponent<UnitScript>().Targeting(hitObj.transform.gameObject);
                             }
-
-                            //Debug.Log(tempObject.GetComponent<UnitScript>().target);
-
-                            //else if (gameObject.GetComponent<KnightScript>())
-                            //{
-                            //    gameObject.GetComponent<KnightScript>().target = hitObj.transform;
-                            //}
                         }
                     }
                 }            

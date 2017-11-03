@@ -15,26 +15,30 @@
 		float3 normal : NORMAL;
 	};
 
-	struct v2f 
+	struct vOut 
 	{
 		float4 pos : POSITION;
 		float4 color : COLOR;
 	};
 
-	uniform float _Outline;
 	uniform float4 _OutlineColor;
+	uniform float _Outline;
 
-	v2f vert(appdata v) 
+
+	vOut vert(appdata v)
 	{
-		v2f o;
-		o.pos = mul(UNITY_MATRIX_MVP, v.vertex);
+		vOut vout;
+		vout.pos = mul(UNITY_MATRIX_MVP, v.vertex);
 
 		float3 norm = mul((float3x3)UNITY_MATRIX_IT_MV, v.normal);
+
 		float2 offset = TransformViewToProjection(norm.xy);
 
-		o.pos.xy += offset * o.pos.z * _Outline;
-		o.color = _OutlineColor;
-		return o;
+		vout.pos.xy += offset * vout.pos.z * _Outline;
+
+		vout.color = _OutlineColor;
+
+		return vout;
 	}
 	ENDCG
 
@@ -57,54 +61,13 @@
 			#pragma vertex vert
 			#pragma fragment frag
 
-			half4 frag(v2f i) : COLOR
+			half4 frag(vOut i) : COLOR
 			{ 
 				return i.color; 
 			}
 
 			ENDCG
 		}
-	}
-
-	SubShader
-	{
-		Tags{ "Queue" = "Overlay" }
-		CGPROGRAM
-		#pragma surface surf Lambert
-
-		sampler2D _MainTex;
-		fixed4 _Color;
-
-		struct Input 
-		{
-			float2 uv_MainTex;
-		};
-
-		void surf(Input IN, inout SurfaceOutput o) 
-		{
-			fixed4 c = tex2D(_MainTex, IN.uv_MainTex) * _Color;
-			o.Albedo = c.rgb;
-			o.Alpha = c.a;
-		}
-
-	ENDCG
-
-		Pass
-		{
-			Name "OUTLINE"
-			Tags{ "LightMode" = "Always" }
-			Cull Front
-			ZWrite On
-			ColorMask RGB
-			Blend SrcAlpha OneMinusSrcAlpha
-
-			CGPROGRAM
-			#pragma vertex vert
-			#pragma exclude_renderers gles xbox360 ps3
-		ENDCG
-		SetTexture[_MainTex]{ combine primary }
-		}
-
 	}
 
 		Fallback "Diffuse"
