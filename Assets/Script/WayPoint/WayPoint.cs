@@ -50,9 +50,9 @@ public class WayPoint : MonoBehaviour
         way = new Stack<Vector3>();
 
         //방문하기 전 노드
-        SortedList<float, Node> opened = new SortedList<float, Node>();
+        SortedList<float, Node> openedList = new SortedList<float, Node>();
         //방문한 Node
-        List<Node> closed = new List<Node>();
+        List<Node> closedList = new List<Node>();
 
         //시작점 근처의 노드 탐색
         Node nowNode = CalcNearNode(transform.position);
@@ -69,23 +69,23 @@ public class WayPoint : MonoBehaviour
             return;
         }
 
-        //루프 돌기 위해 초기화
-        opened.Add(0, nowNode);
-
+        //루프 돌기 위해 openendList 초기화
         nowNode.prevNode = null;
         nowNode.distance = 0.0f;
+        openedList.Add(0, nowNode);
+
 
         //way를 계산하기 위한 루프
-        while (opened.Count > 0)
+        while (openedList.Count > 0)
         {
-            nowNode = opened.Values[0];
-            opened.RemoveAt(0);
+            //첫 위치 제거
+            nowNode = openedList.Values[0];
+            openedList.RemoveAt(0);
 
-            float dist = nowNode.distance;
-            //Debug.Log(dist);
+            float dist = nowNode.distance; //f(x)
 
-            //
-            closed.Add(nowNode);
+            //clusedList에 추가
+            closedList.Add(nowNode);
 
             //종료조건
             if(nowNode == endNode)
@@ -96,28 +96,28 @@ public class WayPoint : MonoBehaviour
             //
             foreach(var adjnode in nowNode._AdjNodes)
             {
-                var newdist = dist + (adjnode.transform.position - nowNode.transform.position).magnitude;
-
                 //방문한 노드이거나, 중복이 있을 경우
-                if (closed.Contains(adjnode) || opened.ContainsValue(adjnode))
+                if (closedList.Contains(adjnode) || openedList.ContainsValue(adjnode))
                 {
-                    //기존 거리가 새 거리보다 짧으면 패스
-                    if(adjnode.distance < newdist)
-                    {
-                        continue;
-                    }
+                    continue;
                 }
 
                 //다음 노드의 이전 노드를 지금 노드로
                 adjnode.prevNode = nowNode;
+                //현재 거리 + 인접노드 거리
+                adjnode.distance = dist + (adjnode.transform.position - nowNode.transform.position).magnitude;
 
-                //현재 거리 + 다음 노드 거리
-                adjnode.distance = newdist;
-                 
+                //인접노드에서 타겟노드 까지의 거리
                 var distanceToTarget = (adjnode.transform.position - endNode.transform.position).magnitude;
 
+                if(openedList.ContainsKey(distanceToTarget))
+                {
+                    continue; 
+                }
+
                 //opened list에 인접노드를 추가.
-                opened.Add(adjnode.distance + distanceToTarget, adjnode);
+                openedList.Add(distanceToTarget, adjnode);
+
             }//end foreach
         }//end While
 
@@ -126,6 +126,7 @@ public class WayPoint : MonoBehaviour
         {
             way.Push(target.transform.position);
 
+            //끝에서부터 이전 노드를 방문하며 시작 지점까지 회귀
             while (nowNode.prevNode != null)
             {
                 way.Push(nowNode.transform.position);
@@ -133,11 +134,7 @@ public class WayPoint : MonoBehaviour
             }
         }//end if
 
-
-        //var endtime = Time.realtimeSinceStartup;
-        //Debug.Log("end time " + endtime);
-        //
-        //Debug.Log(endtime - starttime); 
+        //Debug.Log("test");
     }
 
     public void StopMove()

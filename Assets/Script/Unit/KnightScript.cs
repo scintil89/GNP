@@ -25,7 +25,6 @@ public class KnightScript : UnitScript
     public Animation anim;
     CharacterController characterController = null;
 
-    [SerializeField]
     Dictionary<KNIGHTSTATE, System.Action> dicState = new Dictionary<KNIGHTSTATE, System.Action>();
 
     //이동중 마주친 상대
@@ -84,36 +83,7 @@ public class KnightScript : UnitScript
     }
 
     void Walk()
-    {
-        //Debug.Log("KnightScript Walk");
-
-        //Play Animation
-        anim.Play("WK_heavy_infantry_06_combat_walk");
-
-        //WayNode 방향 벡터
-        Vector3 toward = dst - transform.position;
-
-        //목적지 Node dst가 가까우면 새로운 목적지 설정
-        if (toward.magnitude < 2.0f)
-        {
-            if (gameObject.GetComponent<WayPoint>().way.Count > 0)
-            {
-                dst = gameObject.GetComponent<WayPoint>().way.Pop();
-            }
-            else
-            {
-                Debug.Log("KnightScript Walk : Way Zero");
-            }
-        }
-        
-        //toward 방향으로 이동
-        toward.Normalize();
-        characterController.SimpleMove(toward * moveSpeed);
-        //toward 방향으로 회전
-        transform.rotation = Quaternion.Lerp(transform.rotation,
-            Quaternion.LookRotation(toward),
-            rotationSpeed * Time.deltaTime);
-
+    {   
         //target과의 거리
         Vector3 targetdist = target.transform.position - transform.position;
 
@@ -122,19 +92,44 @@ public class KnightScript : UnitScript
         {
             stateTime = 2.0f;
             state = KNIGHTSTATE.attack;
+
+            return;
         }
+
+        //Play Animation
+        anim.Play("WK_heavy_infantry_06_combat_walk");
+
+        //WayNode 방향 벡터
+        Vector3 toward = dst - transform.position;
+
+        //목적지 Node가 가까우면 새로운 목적지 설정
+        if (toward.magnitude < 5.0f)
+        {
+            if (gameObject.GetComponent<WayPoint>().way.Count > 0)
+            {
+                dst = gameObject.GetComponent<WayPoint>().way.Pop();
+            }
+            else
+            {
+                Debug.Log("KnightScript Walk : Way Zero" + " " + gameObject.name);
+            }
+        }
+        
+        //toward 방향으로 이동
+        toward.Normalize();
+        characterController.SimpleMove(toward * moveSpeed);
+
+        //toward 방향으로 회전
+        transform.rotation = Quaternion.Lerp(transform.rotation,
+            Quaternion.LookRotation(toward),
+            rotationSpeed * Time.deltaTime);
     }
 
     void Attack()
     {
-        //Debug.Log("Attack ================================= ");
-        //anim.Play("attack");
-
         //target이 non active상태면
         if (!target || !target.gameObject.activeSelf)
         {
-            target = RayCastFront(100.0f).gameObject;
-
             state = KNIGHTSTATE.idle;
 
             return;
@@ -187,21 +182,10 @@ public class KnightScript : UnitScript
     // Update is called once per frame
     void Update ()
     {
-        opponent = RayCastFront(5.0f);
-        if(opponent)
-        {
-
-        }
-
         if (!target || !target.gameObject.activeSelf) //타겟이 없으면 Idle 상태
         {
-            //find target
-            var t =  RayCastFront(100.0f);
-        
-            if(t)
-            {
-                Targeting(t);
-            }
+            state = KNIGHTSTATE.idle;
+            target = null;
         }
         else
         {

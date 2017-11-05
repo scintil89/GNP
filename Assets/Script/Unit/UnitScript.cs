@@ -25,7 +25,7 @@ abstract public class UnitScript : MonoBehaviour
     {
         //오브잭트 재스폰시 타겟초기화
         target = null;
-
+        
         if (gameObject.layer == Common.Config.playerLayer)
         {
             enemyLayer = Common.Config.enemyLayer;
@@ -61,5 +61,6 @@ abstract public class UnitScript : MonoBehaviour
         target = t;
 
         gameObject.GetComponent<WayPoint>().CalcWay();
+        dst = gameObject.GetComponent<WayPoint>().way.Pop();
     }
 }
